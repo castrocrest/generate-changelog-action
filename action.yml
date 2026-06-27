@@ -1,0 +1,50 @@
+name: Generate Changelog
+description: >
+  Auto-generate CHANGELOG.md from conventional commits and optionally create a GitHub Release.
+  Supports feat, fix, chore, docs, refactor, perf, test, ci commit types.
+author: castrocrest
+
+branding:
+  icon: book-open
+  color: green
+
+inputs:
+  token:
+    description: GitHub token for creating releases
+    required: true
+    default: ${{ github.token }}
+  output-file:
+    description: Output file path
+    required: false
+    default: CHANGELOG.md
+  release-tag:
+    description: Tag for the GitHub Release (leave empty to skip release creation)
+    required: false
+    default: ""
+  from-tag:
+    description: Start generating changelog from this tag (leave empty for all history)
+    required: false
+    default: ""
+  include-types:
+    description: Comma-separated list of commit types to include
+    required: false
+    default: "feat,fix,perf,refactor,docs,chore"
+
+outputs:
+  changelog-path:
+    description: Path to the generated changelog file
+
+runs:
+  using: composite
+  steps:
+    - name: Generate changelog
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+        OUTPUT_FILE: ${{ inputs.output-file }}
+        RELEASE_TAG: ${{ inputs.release-tag }}
+        FROM_TAG: ${{ inputs.from-tag }}
+        INCLUDE_TYPES: ${{ inputs.include-types }}
+      run: |
+        python3 "${{ github.action_path }}/scripts/generate.py"
+
